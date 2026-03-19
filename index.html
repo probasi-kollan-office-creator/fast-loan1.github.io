@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Wallet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container" class="container">
+        <h1>আপনার রিওয়ার্ড গ্রহণ করুন</h1>
+        <div class="wheel-container">
+            <div id="wheel" class="wheel">
+                <div class="segment" style="--i:1;--color:#ff3e3e;"><span>$0</span></div>
+                <div class="segment" style="--i:2;--color:#3498db;"><span>$10</span></div>
+                <div class="segment" style="--i:3;--color:#2ecc71;"><span>$50</span></div>
+                <div class="segment" style="--i:4;--color:#f1c40f;"><span>$5</span></div>
+                <div class="segment" style="--i:5;--color:#9b59b6;"><span>$0</span></div>
+                <div class="segment" style="--i:6;--color:#e67e22;"><span>$100</span></div>
+            </div>
+            <div class="arrow"></div>
+        </div>
+        <button id="spinBtn" onclick="spinWheel()">স্পিন করুন</button>
+        <p id="message"></p>
+    </div>
+
+    <div id="wallet-container" class="container" style="display: none;">
+        <h1>আপনার ভার্চুয়াল কার্ড</h1>
+        <div class="card">
+            <div class="card-front">
+                <div class="card-header">
+                    <span class="bank-name">INTERNATIONAL PREPAID</span>
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" class="card-logo">
+                </div>
+                <div class="chip-container">
+                    <div class="chip"></div>
+                </div>
+                <div class="card-number">4512 8820 1122 3456</div>
+                <div class="card-details">
+                    <div class="detail-item">
+                        <span class="label">VALID THRU</span>
+                        <span class="value">03/30</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="balance-box">
+            <p>বর্তমান ব্যালেন্স</p>
+            <h2 id="wallet-balance">$0.00</h2>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
